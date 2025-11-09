@@ -1,0 +1,39 @@
+# Core Framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.4.2
+python-multipart==0.0.6
+aiofiles==23.2.1
+
+# Speech-to-Text
+openai-whisper==20231117
+torch==2.1.0
+torchaudio==2.1.0
+
+# Embedding & Vector DB
+sentence-transformers==2.2.2
+chromadb==0.4.18
+tiktoken==0.5.1
+
+# LLM (Ollama client)
+ollama==0.1.6
+httpx>=0.25.2,<0.26.0
+
+# Text-to-Speech (Coqui XTTS v2)
+TTS==0.21.3
+
+# Audio Processing
+librosa==0.10.1
+soundfile==0.12.1
+pydub==0.25.1
+scipy==1.11.4
+
+# Utilities
+python-dotenv==1.0.0
+loguru==0.7.2
+tqdm==4.66.1
+pandas==1.5.3
+numpy==1.26.2
+
+# Optional: Monitoring & Logging
+prometheus-client==0.19.0

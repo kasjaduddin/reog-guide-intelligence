@@ -1,0 +1,46 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+.env
+
+# Model & cache directories
+models/whisper/
+models/sentence_bert/
+models/tts_voice/processed/
+data/embeddings/chroma_db/
+
+# Audio artifacts
+*.wav
+*.mp3
+
+# Jupyter Notebook checkpoints
+notebooks/.ipynb_checkpoints/
+
+# VSCode settings
+.vscode/
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Ollama cache (optional)
+.ollama/
+
+# PyInstaller
+*.spec
+dist/
+build/
+
+# Test artifacts
+coverage/
+htmlcov/
+*.cover
+*.pyc
+.cache/
