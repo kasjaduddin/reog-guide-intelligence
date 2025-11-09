@@ -44,3 +44,13 @@ htmlcov/
 *.cover
 *.pyc
 .cache/
+.pytest_cache/
+.coverage
+
+# Egg & packaging artifacts
+*.egg-info/
+*.egg
+
+# Test audio directories
+test_audio/bahasa_indonesia/*.wav
+test_audio/english/*.wav
