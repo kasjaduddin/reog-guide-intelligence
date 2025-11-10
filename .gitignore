@@ -54,3 +54,6 @@ htmlcov/
 # Test audio directories
 test_audio/bahasa_indonesia/*.wav
 test_audio/english/*.wav
+
+# Knowledge base files
+data/raw/
