@@ -55,5 +55,5 @@ htmlcov/
 test_audio/bahasa_indonesia/*.wav
 test_audio/english/*.wav
 
-# Knowledge base files
-data/raw/
+# Processed knowledge base (auto-generated)
+data/processed/knowledge_base.json
