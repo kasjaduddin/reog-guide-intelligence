@@ -2,7 +2,13 @@
 Unit tests for Embedding Service
 """
 
+import os
+import sys
 import pytest
+
+# src to sys.path to import the module
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 from src.embedding_service import EmbeddingService, get_embedding_service
 
 

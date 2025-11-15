@@ -53,16 +53,16 @@ class KnowledgeBasePreprocessor:
         # Remove special chars but keep Indonesian diacritics and punctuation
         text = re.sub(r'[^\w\s\.\,\!\?\-\—\:\;\'\"]', '', text, flags=re.UNICODE)
         
-        # Normalize quotes
-        text = text.replace('"', '"').replace('"', '"')
-        text = text.replace(''', "'").replace(''', "'")
+        # --- FIX: Normalize quotes (smart quotes -> standard) ---
+        text = text.replace("“", '"').replace("”", '"')
+        text = text.replace("‘", "'").replace("’", "'")
         
         # Strip leading/trailing whitespace
         text = text.strip()
         
         return text
     
-    def chunk_text(self, text: str, max_chunk_size: int = 600, overlap: int = 50) -> List[str]:
+    def chunk_text(self, text: str, max_chunk_size: int = 600, overlap: int = 50, min_chunk_size: int = 100) -> List[str]:
         """
         Split long text into overlapping chunks
         
@@ -70,44 +70,78 @@ class KnowledgeBasePreprocessor:
             text: Input text
             max_chunk_size: Maximum characters per chunk
             overlap: Character overlap between chunks
+            min_chunk_size: Minimum characters for a chunk (to avoid tiny remnants)
         
         Returns:
             List of text chunks
         """
-        # Split into sentences
+        # Split into sentences. (Regex: lookbehind for .!? followed by whitespace)
         sentences = re.split(r'(?<=[.!?])\s+', text)
         
         chunks = []
         current_chunk = ""
         
         for sentence in sentences:
-            # If adding sentence exceeds max, save current chunk
-            if len(current_chunk) + len(sentence) > max_chunk_size and current_chunk:
+            sentence_to_add = sentence + ' ' # Re-add space split on
+            
+            # Handle exceptionally long sentences (longer than max_chunk_size)
+            if len(sentence_to_add) > max_chunk_size:
+                # If there's a chunk being built, save it first
+                if current_chunk.strip():
+                    chunks.append(current_chunk.strip())
+                
+                # Add the long sentence as its own chunk
+                # (This could be split further, but for now, just add it)
+                chunks.append(sentence_to_add.strip())
+                current_chunk = "" # Reset
+                continue # Skip to next sentence
+
+            # Standard case: check if adding the sentence exceeds the max
+            if len(current_chunk) + len(sentence_to_add) > max_chunk_size and current_chunk:
+                # Save current chunk
                 chunks.append(current_chunk.strip())
                 
-                # Start new chunk with overlap (last few words)
+                # Start new chunk with overlap
                 words = current_chunk.split()
+                # Take the last ~10 words for overlap (overlap=50 // 5)
                 overlap_words = words[-overlap//5:] if len(words) > overlap//5 else words
-                current_chunk = ' '.join(overlap_words) + ' ' + sentence + ' '
+                # Start new chunk with overlap AND the new sentence
+                current_chunk = ' '.join(overlap_words) + ' ' + sentence_to_add
             else:
-                current_chunk += sentence + ' '
+                # Add sentence to current chunk
+                current_chunk += sentence_to_add
         
-        # Add remaining chunk
-        if current_chunk.strip():
-            chunks.append(current_chunk.strip())
+        # --- LOGIC FIX: Handle the last chunk ---
         
-        # If no chunking needed (short text)
+        # Add the remaining chunk, check its length
+        final_chunk = current_chunk.strip()
+        if final_chunk:
+            # If the last chunk is too short AND there are preceding chunks
+            if len(final_chunk) < min_chunk_size and len(chunks) > 0:
+                # Merge this short chunk into the previous chunk
+                # This might make the last chunk > max_chunk_size, 
+                # but it's better than a useless tiny chunk.
+                logger.debug(f"Merging short final chunk (len {len(final_chunk)}) to previous chunk.")
+                chunks[-1] = chunks[-1] + ' ' + final_chunk
+            else:
+                # The last chunk is long enough, or this is the *only* chunk
+                chunks.append(final_chunk)
+        
+        # --- END OF LOGIC FIX ---
+        
+        # If no chunking was needed (original text was short)
         if not chunks:
             chunks = [text]
         
-        return chunks
+        # Final filter to ensure no empty strings
+        return [c for c in chunks if c]
     
     def extract_keywords(self, text: str, top_n: int = 5) -> List[str]:
         """
         Extract keywords using frequency analysis
         (Simple TF approach - for production, use TF-IDF or KeyBERT)
         """
-        # Indonesian stopwords (simplified)
+        # Stopwords (simplified, includes ID + EN)
         stopwords = {
             'yang', 'dan', 'di', 'ke', 'dari', 'untuk', 'pada', 'dengan',
             'adalah', 'ini', 'itu', 'atau', 'oleh', 'dalam', 'akan', 'telah',
@@ -145,7 +179,11 @@ class KnowledgeBasePreprocessor:
             # Clean content
             content = self.clean_text(content)
             
+            # If content after cleaning is still < 100, that's an issue
+            # But we assume original files > 100, so after cleaning > 100
+            
             # Chunk if necessary
+            # The new chunk_text function will use min_chunk_size=100 by default
             chunks = self.chunk_text(content, max_chunk_size=600, overlap=50)
             
             # Extract title from filename
@@ -156,6 +194,14 @@ class KnowledgeBasePreprocessor:
             
             # Create document entry for each chunk
             for i, chunk in enumerate(chunks):
+                
+                # --- Additional validation here ---
+                if len(chunk) < 100:
+                    # This shouldn't happen anymore, but as a safeguard
+                    logger.warning(f"Generated chunk is too short ({len(chunk)} chars) from {file_path.name} - Chunk {i}")
+                    # Skip this chunk so it doesn't enter the knowledge base
+                    continue 
+
                 doc_id = f"doc_{len(self.documents) + 1:04d}"
                 
                 # Extract keywords
@@ -297,9 +343,12 @@ class KnowledgeBasePreprocessor:
             issues.append(f"⚠️ Only {en_docs} English documents")
         
         # Check content quality
-        empty_docs = [d for d in self.documents if len(d['content']) < 100]
-        if empty_docs:
-            issues.append(f"⚠️ {len(empty_docs)} documents too short (< 100 chars)")
+        short_docs = [d for d in self.documents if len(d['content']) < 100]
+        if short_docs:
+            issues.append(f"⚠️ {len(short_docs)} documents too short (< 100 chars)")
+            # Show details for debugging
+            for d in short_docs[:5]: # Show the first 5 problematic ones
+                logger.warning(f"   - Short doc: {d['id']} (len: {len(d['content'])}) from {d['metadata']['source_file']}")
         
         # Report
         if issues:
