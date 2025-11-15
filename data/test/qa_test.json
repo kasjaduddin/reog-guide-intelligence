@@ -1,0 +1,32 @@
+[
+  {
+    "question": "Apa itu Reog Ponorogo?",
+    "expected_answer_keywords": ["reog", "ponorogo", "tradisional", "jawa timur"],
+    "language": "id"
+  },
+  {
+    "question": "Siapa yang menciptakan Reog Ponorogo?",
+    "expected_answer_keywords": ["ki ageng kutu", "majapahit", "pencipta"],
+    "language": "id"
+  },
+  {
+    "question": "Apa itu Barongan?",
+    "expected_answer_keywords": ["barongan", "topeng", "singa", "merak"],
+    "language": "id"
+  },
+  {
+    "question": "What is Reog Ponorogo?",
+    "expected_answer_keywords": ["reog", "ponorogo", "traditional", "east java"],
+    "language": "en"
+  },
+  {
+    "question": "Who created Reog?",
+    "expected_answer_keywords": ["ki ageng kutu", "majapahit", "created"],
+    "language": "en"
+  },
+  {
+    "question": "When is the Reog festival held?",
+    "expected_answer_keywords": ["festival", "annual", "suro", "month"],
+    "language": "en"
+  }
+]
