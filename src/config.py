@@ -45,7 +45,7 @@ class Config:
     
     # RAG Settings
     RAG_TOP_K = 3  # Number of documents to retrieve
-    RAG_SCORE_THRESHOLD = 0.5  # Minimum similarity score
+    RAG_SCORE_THRESHOLD = 0.12  # Minimum similarity score
     
     # ========================================================================
     # LOGGING
