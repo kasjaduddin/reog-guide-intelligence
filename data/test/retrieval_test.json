@@ -1,0 +1,17 @@
+[
+  {
+    "question": "Apa itu Reog Ponorogo?",
+    "language": "id",
+    "relevant_doc_ids": ["doc_0001", "doc_0002"]
+  },
+  {
+    "question": "Siapa Ki Ageng Kutu?",
+    "language": "id",
+    "relevant_doc_ids": ["doc_0003", "doc_0004"]
+  },
+  {
+    "question": "What is Barongan?",
+    "language": "en",
+    "relevant_doc_ids": ["doc_0005"]
+  }
+]
