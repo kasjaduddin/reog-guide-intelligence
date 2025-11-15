@@ -51,5 +51,16 @@ class Config:
     # LOGGING
     # ========================================================================
     LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
+    
+    # ========================================================================
+    # LLM CONFIGURATION (Ollama)
+    # ========================================================================
+    OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2:3b")
+    OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+    OLLAMA_TEMPERATURE = float(os.getenv("OLLAMA_TEMPERATURE", "0.7"))
+    OLLAMA_MAX_TOKENS = int(os.getenv("OLLAMA_MAX_TOKENS", "512"))
+    
+    # LLM Options
+    LLM_TIMEOUT = 60  # seconds
 
 config = Config()
